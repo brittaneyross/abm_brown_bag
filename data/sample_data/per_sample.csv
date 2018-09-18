@@ -1,0 +1,17 @@
+,hh_id,person_id,person_num,age,gender,type
+31106,2051162,3943948,1,43,m,Full-time worker
+31107,2051162,3943949,2,36,f,Non-worker
+31108,2051162,3943950,3,9,m,Student of non-driving age
+31109,2051162,3943951,4,8,m,Student of non-driving age
+31110,2051162,3943952,5,2,m,Child too young for school
+52765,3273911,7582498,1,54,m,Non-worker
+52766,3273911,7582499,2,54,f,Full-time worker
+52767,3273911,7582500,3,30,f,Part-time worker
+67697,2019925,3814705,1,33,m,Full-time worker
+67698,2019925,3814706,2,33,f,Non-worker
+67699,2019925,3814707,3,6,m,Student of non-driving age
+67700,2019925,3814708,4,3,f,Child too young for school
+76873,2484828,4948826,1,61,m,Full-time worker
+76874,2484828,4948827,2,59,f,Full-time worker
+101509,2429487,4838144,1,45,m,Full-time worker
+101510,2429487,4838145,2,17,m,Student of driving age
