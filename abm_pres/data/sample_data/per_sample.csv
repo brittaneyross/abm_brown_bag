@@ -1,17 +1,9 @@
 hh_id,person_id,person_num,age,gender,type
-2051162,3943948,1,43,m,Full-time worker
-2051162,3943949,2,36,f,Non-worker
-2051162,3943950,3,9,m,Student of non-driving age
-2051162,3943951,4,8,m,Student of non-driving age
-2051162,3943952,5,2,m,Child too young for school
-3273911,7582498,1,54,m,Non-worker
-3273911,7582499,2,54,f,Full-time worker
-3273911,7582500,3,30,f,Part-time worker
-2019925,3814705,1,33,m,Full-time worker
-2019925,3814706,2,33,f,Non-worker
-2019925,3814707,3,6,m,Student of non-driving age
-2019925,3814708,4,3,f,Child too young for school
-2484828,4948826,1,61,m,Full-time worker
-2484828,4948827,2,59,f,Full-time worker
-2429487,4838144,1,45,m,Full-time worker
-2429487,4838145,2,17,m,Student of driving age
+1610316,2811881,1,24,f,University student
+1610316,2811882,2,26,m,Full-time worker
+512551,972988,1,32,m,Full-time worker
+346143,806580,1,53,m,Full-time worker
+2506860,4992890,1,72,m,Part-time worker
+2506860,4992891,2,67,f,Part-time worker
+2267230,4513630,1,25,m,Full-time worker
+2267230,4513631,2,20,f,University student

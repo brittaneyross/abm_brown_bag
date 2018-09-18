@@ -151,7 +151,7 @@ def output_tab():
     per_tbl = DataTable(columns=per_col, source=per_src,height = 200,selectable = True,width=int(column_width*.45),
                          fit_columns = True, scroll_to_selection=True)
 
-    tour_div = Div(text="""<h2>Individual Tour Results</h2><p>Individual tours by person and household</p>
+    tour_div = Div(text="""<h2>Tour Results</h2><p>Tours by person and household</p>
                         <ul><li><b>hh_id</b> : Household ID</li>
                         <li><b>person_id</b> : Person ID</li>
                         <li><b>tour_id</b> : Tour ID (0=first tour, 1 second tour, ect)</li>
@@ -163,7 +163,7 @@ def output_tab():
                          fit_columns = True, scroll_to_selection=True)
 
     line_div = trip_div = Div(text="""<hr>""", width = column_width)
-    trip_div = Div(text="""<h2>Individual Trip Results</h2><p>Individual tours by person and household</p>
+    trip_div = Div(text="""<h2>Trip Results</h2><p>Trips by person and household</p>
                         <ul><li><b>hh_id</b> : Household ID</li>
                         <li><b>person_id</b> : Person ID</li>
                         <li><b>tour_id</b> : Tour ID (0=first tour, 1 second tour, ect)</li>
