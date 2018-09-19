@@ -34,7 +34,7 @@ warnings.filterwarnings('ignore')
 
 from bokeh.io import curdoc
 
-
+#read datea
 hh_sample= pd.read_csv(join(dirname(__file__),'data','sample_data','hh_sample.csv'))
 per_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','per_sample.csv'))
 iTours_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itour_sample.csv'))
