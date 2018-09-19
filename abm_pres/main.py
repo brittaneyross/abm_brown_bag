@@ -163,7 +163,7 @@ def load_image(image, title_text):
 
 def abm_background():
     b_title = Div(text = """<h1>What is an Activity Based Model (ABM)?</h1><br>""",width = column_width)
-    background = Div(text = """<ul><li><h3>Travel demand model that similulates individual and household transportation decisions</h3></li><br>
+    background = Div(text = """<ul><li><h3>Travel demand model that simulates  individual and household transportation decisions</h3></li><br>
                             <li><h3>Generates activities, identifies destinations for activities, determines mode of travel, and assigns routes on our network</h3></li><br>
                             <li><h3>Considers personal and household attributes to predict:</h3></li>
                                 <ul><li>Types of activities a traveler participates in</li>
