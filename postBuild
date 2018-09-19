@@ -5,3 +5,10 @@ jupyter serverextension enable --sys-prefix nbserverproxy
 mv bokehserverextension.py ${NB_PYTHON_PREFIX}/lib/python*/site-packages/
 # enable bokeh extension
 jupyter serverextension enable --sys-prefix bokehserverextension
+#jupter notebook extenstions
+jupyter contrib nbextension install --user
+jupyter nbextension enable --py widgetsnbextension
+jupyter nbextension enable python-markdown/main
+
+# Notebooks w/ extensions that auto-run code must be "trusted" to work the first time
+jupyter trust abm_brown_bag.ipynb
