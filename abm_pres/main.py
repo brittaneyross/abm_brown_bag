@@ -39,12 +39,120 @@ hh_sample= pd.read_csv(join(dirname(__file__),'data','sample_data','hh_sample.cs
 per_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','per_sample.csv'))
 iTours_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itour_sample.csv'))
 itrips_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itrips_sample.csv'))
-abm_flow = join(dirname(__file__),'data','abm_flow_chart.png')
+abm_flow = join(dirname(__file__),'static','abm_flow_chart.png')
+dist_bar_values = pd.read_csv(join(dirname(__file__),'data','dist_bar.csv'))
+mode_bar_values = pd.read_csv(join(dirname(__file__),'data','mode_bar.csv'))
+
 
 ### plots with python call backs require the bokeh server
 #plots should be inializted from bokeh application handler
 column_width = 1600
 margin = 150
+
+def make_filter_vbar(df, groups_field, subgroups, filters, tool_tips, chart_tools,palette_color,
+                     p_width = 400, p_height = 200, chart_title="Sample Grouped Bar Chart",
+                     drop_down_label = "Sample Dropdown"):
+
+    df_copy = df.copy()
+
+    def filter_df(df, fvalue):
+        if fvalue:
+            return df.loc[df[filters]==fvalue]
+        else:
+            return df
+
+    def update(attr, old, new):
+
+        drop_value = drop_down.value
+
+        df_copy = filter_df(df, drop_value)
+
+        new_source = make_source(df_copy)[0]
+        chart_source.data.update(new_source.data)
+
+        p.title.text = chart_title + "-" + drop_value
+
+    def make_source(df_src):
+        df_groupby = df_src.groupby([groups_field]).sum().reset_index()
+        df_groups = df_groupby[groups_field].values.tolist()
+        numgroups = len(subgroups)
+
+        data = {'groups': df_groups}
+
+        ziplist = ()
+        for s in subgroups:
+            data[s] = df_groupby[s].values.tolist()
+            ziplist += (data[s],)
+
+
+        x = [(g, s) for g in df_groups for s in subgroups]
+        sgroups = [s for g in df_groups for s in subgroups]
+        pgroups = [g for g in df_groups for s in subgroups]
+
+        if numgroups == 2:
+            counts = sum(zip(ziplist[0], ziplist[1]), ())
+        elif numgroups ==3:
+            counts = sum(zip(ziplist[0], ziplist[1], ziplist[2]), ())
+        elif numgroups ==4:
+            counts = sum(zip(ziplist[0], ziplist[1], ziplist[2], ziplist[3]), ())
+        elif numgroups ==5:
+            counts = sum(zip(ziplist[0], ziplist[1], ziplist[2], ziplist[3], ziplist[4]), ())
+        elif numgroups ==6:
+            counts = sum(zip(ziplist[0], ziplist[1], ziplist[2], ziplist[3], ziplist[4], ziplist[5]), ())
+        elif numgroups ==7:
+            counts = sum(zip(ziplist[0], ziplist[1], ziplist[2], ziplist[3], ziplist[4],
+                             ziplist[5], ziplist[6]), ())
+        elif numgroups ==8:
+            counts = sum(zip(ziplist[0], ziplist[1], ziplist[2], ziplist[3], ziplist[4],
+                             ziplist[5], ziplist[6], ziplist[7]), ())
+        elif numgroups ==9:
+            counts = sum(zip(ziplist[0], ziplist[1], ziplist[2], ziplist[3], ziplist[4],
+                             ziplist[5], ziplist[6], ziplist[7], ziplist[8]), ())
+        elif numgroups ==10:
+            counts = sum(zip(ziplist[0], ziplist[1], ziplist[2], ziplist[3], ziplist[4],
+                             ziplist[5], ziplist[6], ziplist[7], ziplist[8], ziplist[9]), ())
+
+        source = ColumnDataSource(data=dict(x=x, counts=counts, sub=sgroups, prime=pgroups))
+
+        return source, x, sgroups
+    def make_chart(source,x,sgroups):
+
+        p = figure(x_range=FactorRange(*x), plot_width = p_width,plot_height=p_height, title=chart_title,
+        toolbar_location='right', tools=chart_tools,
+        tooltips=tool_tips)
+
+        p.vbar(x='x', top='counts', width=0.9, source=source,
+              line_color='white', fill_color=factor_cmap('x', palette=palette_color, factors=sgroups, start=1, end=2))
+
+        return p
+
+    df_copy = df.copy()
+
+    filter_menu = []
+    for f in df[filters].drop_duplicates().values.tolist():
+        filter_menu.append((f.title(),f))
+
+    drop_down = Dropdown(label=drop_down_label, button_type="default", menu=filter_menu, width=250)
+    drop_down.on_change('value', update)
+
+
+    src = make_source(df_copy.loc[df_copy['Filter']=='Discretionary'])
+    chart_source = src[0]
+    x = src[1]
+    sgroups = src[2]
+
+    p = make_chart(chart_source, x, sgroups)
+
+    # Styling
+    #p = bar_style(p)
+
+    p.y_range.start = 0
+    p.x_range.range_padding = 0.1
+    p.xaxis.major_label_orientation = 1
+    p.xgrid.grid_line_color = None
+
+    return column(drop_down, p)
+        #return source
 
 
 def load_image(image, title_text):
@@ -54,9 +162,83 @@ def load_image(image, title_text):
     return p
 
 def abm_background():
-    background = Div(text = """<h1>What is the Activity Based Model</h1>""",width=column_width)
+    b_title = Div(text = """<h1>What is an Activity Based Model (ABM)?</h1><br>""",width = column_width)
+    background = Div(text = """<ul><li><h3>Travel demand model that similulates individual and household transportation decisions</h3></li><br>
+                            <li><h3>Generates activities, identifies destinations for activities, determines mode of travel, and assigns routes on our network</h3></li><br>
+                            <li><h3>Considers personal and household attributes to predict:</h3></li>
+                                <ul><li>Types of activities a traveler participates in</li>
+                                <li>The individual and/or household members participating in the activity</li>
+                                <li>Where to participate in the activity</li>
+                                <li>How activities are scheduled/prioritized</li>
+                                <li>Time available to participate in those activies</li>
+                                <li>Mode of travel reach each activity</li>
+                                </ul><br>
+                            <li><h3>Produces a behaviorally realistic representation of travel compared to the trip-based model</h3></li>
+                            </ul>
+                            """,width=int(column_width*.4), style={'font-size':'150%'})
 
-    return (row(Spacer(width = margin), column(Spacer(height=25),background)))
+    model_tbl = pd.DataFrame({'Travel Questions': ['What activities do people want to participate in?',
+                                                  'Where are these activities?','When are these activities?',
+                                                  'What travel mode is used?','What route is used?'],
+                             'Trip-Based Model': ['Trip generation','Trip distribution','None','Trip mode choice','Network assignment'],
+                             'Activity-Based Model': ['Activity generation and scheduling','Tour and trip destination choice',
+                                                       'Tour and trip time of day','Tour and trip mode choice','Network assignment']})
+
+    div_tbl = Div(text=model_tbl.to_html(index=False,classes=["table-bordered", "table-hover"],),
+                    width=int(column_width*.6), height = 500, style={'font-size':'120%'})
+
+    return row(Spacer(width = margin), column(Spacer(height=25),b_title,row(background, Spacer(width=int(column_width*.10)), column(Spacer(height=80),div_tbl))))
+
+def key_features():
+
+    kf_title = Div(text="""<h1>Why use an activity based model?</h1>""", width = column_width)
+
+    kf_attr = Div(text="""<h3>Each Traveler's Personal Attributes Inform Unique Travel Choices</h3>
+                            <ul><li>Makes the model more sensitive to planning strategies and policies that:</li>
+                           <ul><li>Influence how an individual budgets time for activies and travel throughout the day </li>
+                               <li>Promote carpooling, increase/decrease transit access/cost, implement tolling, etc</li>
+                           </ul></ul>
+                       """,width=int(column_width*.6), style={'font-size':'150%'})
+
+    attr_tbl = pd.DataFrame({'Personal Attributes': ['Age',
+                                                  'Employment Status',
+                                                  'School Status'],
+                             'Household Attributes': ['Income', 'Number of Vehicles','Household Size']})
+
+    div_attr_tbl = Div(text=attr_tbl.to_html(index=False,classes=["table-bordered", "table-hover"],), style={'font-size':'120%'})
+
+    kf_traveler = Div(text="""<h3>Each Traveler Can Be Identified Throughout Similuation</h3>
+                                <ul><li>Works at the disaggregate person level rather than the aggregate zonal-level</li>
+                                <li>Enables analysis of travel patterns across a wide range of dimensions (socioeconomic groups)</li>
+                                <li>Useful in developing metrics on how travel benefits or disbenefits impact different populations </li>
+                                </ul>
+                       """,width=int(column_width*.6), style={'font-size':'150%'})
+
+
+
+    purp_bar_chart = make_filter_vbar(dist_bar_values, 'Distance', ['0-35K', '35K-60k','60K-100K', '100K+'], "Filter",
+                     [("label1"," @prime"), ("label2", "@sub"), ("label3", "@counts{0.0f}%")], 'hover',Spectral6,
+                     p_width = 600, p_height = 300, chart_title="Distance by Activity and Income",
+                     drop_down_label = "Choose Trip Purpose")
+
+    mode_bar_chart = make_filter_vbar(mode_bar_values, 'trip_mode', ['0-35K', '35K-60k','60K-100K', '100K+'], "Filter",
+                     [("label1"," @prime"), ("label2", "@sub"), ("label3", "@counts{0.0f}%")], 'hover',Spectral6,
+                     p_width = 600, p_height = 300, chart_title="Distance by Activity and Income",
+                     drop_down_label = "Choose Trip Purpose")
+
+
+
+    kf_tours = Div(text="""<h3>Travel Is Organized Into Tours and Trips</h3>
+                            <ul><li>Travel for each individual or group is represented in a tour, a chain of trips that start and end at home, to generate daily activity pattern</li>
+                            <li>Trips making up a tour portray how activities are organized and the model decisions made by the person during the trip</li>
+                            <li>Enables segmentation by trip purpose (activity) and mode</li>
+                            </ul>
+                       """, width=int(column_width*.6), style={'font-size':'150%'})
+
+    return (row(Spacer(width = margin), column(Spacer(height=25),
+            row(column(kf_title, kf_attr, Spacer(height=150), kf_traveler, Spacer(height=100), kf_tours,width=int(column_width*.6)),Spacer(width=10),
+            column(Spacer(height=50),div_attr_tbl, Spacer(height=20),purp_bar_chart,Spacer(height=20),mode_bar_chart)))))
+
 
 def overview_tab():
 
@@ -64,8 +246,8 @@ def overview_tab():
     image = Div(text="<img src='abm_pres/static/abm_flow_chart.png'>")
 
     overview_text = Div(text="""<h1>Activity Based Model Overview</h1>""", width = column_width)
-    ctramp_text = Div(text="""<h2>Coordinated Travel - Regional Activity Modeling Platform
-                        (CT-RAMP) </h2><p>ABM model implements the CT-RAMP design and software platform.
+    ctramp_text = Div(text="""<h3>Coordinated Travel - Regional Activity Modeling Platform
+                        (CT-RAMP) </h3><p>ABM model implements the CT-RAMP design and software platform.
                         Features microsimulation of travel decisions for individual households and persons
                         within a household as well as intra-household interactions
                         across a range of activity and travel dimensions.</p><br>
@@ -81,7 +263,7 @@ def overview_tab():
                         <li><b>Trips</b> - Mode, parking, and location of trips making up tour is determined.</li><br>
                         <li><b>Network Simulation</b> - List of trips for each individual and/or travel party
                         is generated and trips routes are assigned on the modeling network for auto and transit.</li>
-                        </ol>""", width = int(column_width*.5))
+                        </ol>""", width = int(column_width*.5), style={'font-size':'150%'})
     extra = Div(text="""<hr><ul><li>Tour: Chain of trips that start and end at home</li>
                         <li>Person Types: 8 Person Types (1=Full time worker, 2=Part time worker, 3=University student,
                         4=Adult non-worker under 65, 5=retiree, 6=driving age school child, 7=pre-driving age school child, 8=preschool child)</li>
@@ -94,25 +276,6 @@ def overview_tab():
 
     return (row(Spacer(width = margin), (column(Spacer(width = margin, height=25),overview_text,row(column(ctramp_text,extra),Spacer(width=100),column(image))))))
 
-
-def key_features():
-
-    kf_title = Div(text="""<h1>ABM Features</h1>""", width = column_width)
-
-    kf_tours = Div(text="""<h2>Travel Is Organized Into Tours and Trips</h2>
-                       """, width = column_width)
-
-    kf_traveler = Div(text="""<h2>Each Traveler Can Be Identified Throughout Similuation</h2>
-    <p>As individual travelers are simulated the results are listed by household, person, tour, and trip.
-    Allows trip/tour results to be represented across any number of categories included in the synthetic population results.</p>
-                       """, width = column_width)
-
-    kf_attr = Div(text="""<h2>Each Traveler’s Personal Attributes Inform Unique Travel Choices</h2>
-    <p>Person and household decision making units such as person type, age, work/school status, income, available vehicles
-        inform travel choices.</p>
-                       """, width = column_width)
-
-    return (row(Spacer(width = margin), column(Spacer(height=25),kf_title, kf_tours,kf_traveler,kf_attr)))
 
 def output_tab():
 
@@ -130,7 +293,7 @@ def output_tab():
     trip_src = ColumnDataSource(itrips_sample.sort_values(by='person_id'))
 
 
-    hh_div = Div(text="""<h2>Household Attribution Results</h2><p>Individual household attributes</p>
+    hh_div = Div(text="""<h3>Household Attribution Results</h3><p>Individual household attributes</p>
                         <ul><li><b>hh_id</b> : Household ID</li>
                         <li><b>maz</b> : Household Subzone</li>
                         <li><b>income</b> : Household Income</li>
@@ -141,7 +304,7 @@ def output_tab():
     hh_tbl = DataTable(columns=hh_col, source=hh_src, height = 200, selectable = True,width=int(column_width*.45),
                              fit_columns = True, scroll_to_selection=True)
 
-    per_div = Div(text="""<h2>Person Attribution Results</h2><p>Individual persons within a household</p>
+    per_div = Div(text="""<h3>Person Attribution Results</h3><p>Individual persons within a household</p>
                         <ul><li><b>hh_id</b> : Household ID</li>
                         <li><b>person_id</b> : Person ID</li>
                         <li><b>per_num</b> : Person Number in Household</li>
@@ -151,7 +314,7 @@ def output_tab():
     per_tbl = DataTable(columns=per_col, source=per_src,height = 200,selectable = True,width=int(column_width*.45),
                          fit_columns = True, scroll_to_selection=True)
 
-    tour_div = Div(text="""<h2>Tour Results</h2><p>Tours by person and household</p>
+    tour_div = Div(text="""<h3>Tour Results</h3><p>Tours by person and household</p>
                         <ul><li><b>hh_id</b> : Household ID</li>
                         <li><b>person_id</b> : Person ID</li>
                         <li><b>tour_id</b> : Tour ID (0=first tour, 1 second tour, ect)</li>
@@ -163,7 +326,7 @@ def output_tab():
                          fit_columns = True, scroll_to_selection=True)
 
     line_div = trip_div = Div(text="""<hr>""", width = column_width)
-    trip_div = Div(text="""<h2>Trip Results</h2><p>Trips by person and household</p>
+    trip_div = Div(text="""<h3>Trip Results</h3><p>Trips by person and household</p>
                         <ul><li><b>hh_id</b> : Household ID</li>
                         <li><b>person_id</b> : Person ID</li>
                         <li><b>tour_id</b> : Tour ID (0=first tour, 1 second tour, ect)</li>
@@ -250,12 +413,12 @@ l_1 = layout(children=[overview_tab()])
 l_2 = layout(children=[output_tab()])
 l_3 = layout(children=[h_4])
 
-tab_0 = Panel(child=b_0, title = 'Background')
-tab_1 = Panel(child=b_1, title = 'Features')
+tab_0 = Panel(child=b_0, title ='Background')
+tab_1 = Panel(child=b_1, title ='Advantages')
 
-tab_2 = Panel(child=l_1, title = 'Model Overview')
-tab_3 = Panel(child=l_2, title = 'Outputs')
-tab_4 = Panel(child=l_3, title = 'Data Exploration')
+tab_2 = Panel(child=l_1, title ='Model Overview')
+tab_3 = Panel(child=l_2, title ='Outputs')
+tab_4 = Panel(child=l_3, title ='Data Exploration')
 
 tabs = Tabs(tabs = [tab_0, tab_1, tab_2, tab_3, tab_4], sizing_mode = "stretch_both")
 
