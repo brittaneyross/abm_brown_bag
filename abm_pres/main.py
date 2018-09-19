@@ -241,9 +241,9 @@ def key_features():
 
 
 def overview_tab():
-
+    #image linke
     #image = load_image(abm_flow,'CT-RAMP Structure and Sub-Models')
-    image = Div(text="""<img src="/abm_pres/static/abm_flow_chart.png/">""")
+    flow_image = Div(text="""<img src="/abm_pres/static/abm_flow_chart.png/">""")
 
     overview_text = Div(text="""<h1>Activity Based Model Overview</h1>""", width = column_width)
     ctramp_text = Div(text="""<h3>Coordinated Travel - Regional Activity Modeling Platform
@@ -274,7 +274,7 @@ def overview_tab():
                         </ul>""", width = int(column_width*.5),
                         css_classes = ['small'])
 
-    return (row(Spacer(width = margin), (column(Spacer(width = margin, height=25),overview_text,row(column(ctramp_text,extra),Spacer(width=100),column(image))))))
+    return (row(Spacer(width = margin), (column(Spacer(width = margin, height=25),overview_text,row(column(ctramp_text,extra),Spacer(width=100),column(flow_image))))))
 
 
 def output_tab():
