@@ -1,0 +1,25 @@
+hh_id,person_id,tour_id,orig_purpose,dest_purpose,orig_maz,dest_maz,trip_mode,board_tap,alight_tap
+1610316,2811881,0,Home,university,51,48,13,0,0
+1610316,2811881,0,university,Home,48,51,13,0,0
+1610316,2811882,0,Home,work,51,27,Walk,0,0
+1610316,2811882,0,work,Home,27,51,Walk,0,0
+512551,972988,0,Home,work,65,29,Walk,0,0
+512551,972988,0,work,Home,29,65,Walk,0,0
+512551,972988,0,Home,eatingout,65,20,Shared ride 3+ free,0,0
+512551,972988,0,eatingout,Shop,20,638,Shared ride 3+ free,0,0
+512551,972988,0,Shop,Home,638,65,Shared ride 2 free,0,0
+346143,806580,0,Home,work,420,408,Walk,0,0
+346143,806580,0,work,Home,408,420,Walk to premium transit,63917,64041
+346143,806580,1,Home,work,420,408,Walk,0,0
+346143,806580,1,work,Home,408,420,Walk,0,0
+2506860,4992890,0,Home,shop,10241,10141,Taxi,0,0
+2506860,4992890,0,shop,Escort,10141,10148,Taxi,0,0
+2506860,4992890,0,Escort,Home,10148,10241,Taxi,0,0
+2506860,4992891,0,Home,escort,10241,10255,Taxi,0,0
+2506860,4992891,0,escort,Home,10255,10241,Taxi,0,0
+2267230,4513630,0,Home,work,16614,11131,Drive alone pay,0,0
+2267230,4513630,0,work,Home,11131,16614,Drive alone pay,0,0
+2267230,4513631,0,Home,work,16614,16611,Shared ride 2 free,0,0
+2267230,4513631,0,work,Home,16611,16614,Taxi,0,0
+2267230,4513631,1,Home,work,16614,16611,Taxi,0,0
+2267230,4513631,1,work,Home,16611,16614,Taxi,0,0

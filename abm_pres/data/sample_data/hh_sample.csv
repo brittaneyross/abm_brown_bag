@@ -1,0 +1,6 @@
+hh_id,maz,income,autos,size,workers,auto_suff
+2506860,10241,45300,2,2,2,cars>=wkrs
+512551,65,40000,0,1,1,nocars
+346143,420,23000,1,1,1,cars>=wkrs
+1610316,51,85300,0,2,1,nocars
+2267230,16614,35000,2,2,2,cars>=wkrs
