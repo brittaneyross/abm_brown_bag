@@ -39,7 +39,7 @@ hh_sample= pd.read_csv(join(dirname(__file__),'data','sample_data','hh_sample.cs
 per_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','per_sample.csv'))
 iTours_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itour_sample.csv'))
 itrips_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itrips_sample.csv'))
-abm_flow = join(dirname(__file__),'static','abm_flow_chart.png')
+abm_flow = join(dirname(__file__),'static','abm_flow_chart.PNG')
 dist_bar_values = pd.read_csv(join(dirname(__file__),'data','dist_bar.csv'))
 mode_bar_values = pd.read_csv(join(dirname(__file__),'data','mode_bar.csv'))
 
@@ -243,7 +243,7 @@ def key_features():
 def overview_tab():
 
     #image = load_image(abm_flow,'CT-RAMP Structure and Sub-Models')
-    image = Div(text="<img src='/abm_pres/static/abm_flow_chart.png'>")
+    image = Div(text="<img src='/static/abm_flow_chart.png'>")
 
     overview_text = Div(text="""<h1>Activity Based Model Overview</h1>""", width = column_width)
     ctramp_text = Div(text="""<h3>Coordinated Travel - Regional Activity Modeling Platform
