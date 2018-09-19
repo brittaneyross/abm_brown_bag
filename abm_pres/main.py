@@ -230,7 +230,7 @@ def key_features():
 
     kf_tours = Div(text="""<h3>Travel Is Organized Into Tours and Trips</h3>
                             <ul><li>Travel for each individual or group is represented in a tour, a chain of trips that start and end at home, to generate daily activity pattern</li>
-                            <li>Trips making up a tour portray how activities are organized and the model decisions made by the person during the trip</li>
+                            <li>Trips making up a tour portray how activities are organized as well as modal decisions made by the person during the trip</li>
                             <li>Enables segmentation by trip purpose (activity) and mode</li>
                             </ul>
                        """, width=int(column_width*.6), style={'font-size':'150%'})
@@ -243,7 +243,7 @@ def key_features():
 def overview_tab():
 
     #image = load_image(abm_flow,'CT-RAMP Structure and Sub-Models')
-    image = Div(text="<img src='abm_pres/static/abm_flow_chart.png'>")
+    image = Div(text="<img src='/abm_pres/static/abm_flow_chart.png'>")
 
     overview_text = Div(text="""<h1>Activity Based Model Overview</h1>""", width = column_width)
     ctramp_text = Div(text="""<h3>Coordinated Travel - Regional Activity Modeling Platform
