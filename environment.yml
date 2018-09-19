@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 dependencies:
   - bokeh
   - nbserverproxy
@@ -7,14 +6,3 @@ dependencies:
   - fiona
   - geopandas
   - shapely
-=======
-dependencies:
-  - bokeh
-  - nbserverproxy
-  - pandas
-  - numpy
-  - fiona
-  - geopandas
-  - shapely
-  - pscript
->>>>>>> 103f0cfb8c15aaf93caed9e561f1ab79d1c88f6d
