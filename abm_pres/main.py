@@ -170,7 +170,7 @@ def abm_background():
                                 <li>The individual and/or household members participating in the activity</li>
                                 <li>Where to participate in the activity</li>
                                 <li>How activities are scheduled/prioritized</li>
-                                <li>Time available to participate in those activies</li>
+                                <li>Time available to participate in those activities</li>
                                 <li>Mode of travel reach each activity</li>
                                 </ul><br>
                             <li><h3>Produces a behaviorally realistic representation of travel compared to the trip-based model</h3></li>
@@ -195,7 +195,7 @@ def key_features():
 
     kf_attr = Div(text="""<h3>Each Traveler's Personal Attributes Inform Unique Travel Choices</h3>
                             <ul><li>Makes the model more sensitive to planning strategies and policies that:</li>
-                           <ul><li>Influence how an individual budgets time for activies and travel throughout the day </li>
+                           <ul><li>Influence how an individual budgets time for activities and travel throughout the day </li>
                                <li>Promote carpooling, increase/decrease transit access/cost, implement tolling, etc</li>
                            </ul></ul>
                        """,width=int(column_width*.6), style={'font-size':'150%'})
@@ -207,7 +207,7 @@ def key_features():
 
     div_attr_tbl = Div(text=attr_tbl.to_html(index=False,classes=["table-bordered", "table-hover"],), style={'font-size':'120%'})
 
-    kf_traveler = Div(text="""<h3>Each Traveler Can Be Identified Throughout Similuation</h3>
+    kf_traveler = Div(text="""<h3>Each Traveler Can Be Identified Throughout Simulation</h3>
                                 <ul><li>Works at the disaggregate person level rather than the aggregate zonal-level</li>
                                 <li>Enables analysis of travel patterns across a wide range of dimensions (socioeconomic groups)</li>
                                 <li>Useful in developing metrics on how travel benefits or disbenefits impact different populations </li>
