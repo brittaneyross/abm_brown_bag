@@ -34,13 +34,19 @@ warnings.filterwarnings('ignore')
 
 from bokeh.io import curdoc
 
-image = Div(text="""<img src="/abm_pres/static/abm_flow_chart.png/">""")
+column_width = 1400
+margin = 100
+
+dist_bar_values = pd.read_csv(join(dirname(__file__),'data','dist_bar.csv'))
+mode_bar_values = pd.read_csv(join(dirname(__file__),'data','mode_bar.csv'))
+
+hh_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','hh_sample.csv'))
+per_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','per_sample.csv'))
+iTours_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itour_sample.csv'))
+itrips_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itrips_sample.csv'))
 
 
-# note that in my implementation, there are more elements in the column, but this is not needed for this example.
-col = column(image)
 
-<<<<<<< HEAD
 def make_filter_vbar(df, groups_field, subgroups, filters, tool_tips, chart_tools,palette_color,
                      p_width = 400, p_height = 200, chart_title="Sample Grouped Bar Chart",
                      drop_down_label = "Sample Dropdown"):
@@ -415,7 +421,3 @@ tab_4 = Panel(child=l_3, title ='Data Exploration')
 tabs = Tabs(tabs = [tab_0, tab_1, tab_2, tab_3, tab_4], sizing_mode = "stretch_both")
 
 curdoc().add_root(tabs)
-=======
-# create the document
-curdoc().add_root(col)
->>>>>>> c393403242bbee2d99ce55e7e0b4a5745313f772
