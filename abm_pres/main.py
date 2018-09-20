@@ -44,7 +44,7 @@ hh_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','hh_sample.c
 per_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','per_sample.csv'))
 iTours_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itour_sample.csv'))
 itrips_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itrips_sample.csv'))
-ecd = join(dirname(__file__),'data','shapefiles','ecd_shp.shp')
+#ecd = join(dirname(__file__),'data','shapefiles','ecd_shp.shp')
 ecd_maz = join(dirname(__file__),'data','shapefiles','ecdmazdest_shp.shp')
 ecd_trips_attr = pd.read_csv(join(dirname(__file__),'data','ecd_trip_groups.csv'))
 
@@ -468,7 +468,7 @@ def data_explore():
             values=ecd_trips_attr['Model'],aggfunc=sum).fillna(0).reset_index()
 
     shp = fiona.open(ecd_maz)
-    mazs = [y_val["properties"]["subzone09"] if y_val["properties"]["subzone09"] <= 16443 else 0 for y_val in shp]
+    mazs = [y_val["properties"]["subzone09"] for y_val in shp]
 
     base = pd.DataFrame({'subzones': mazs})
     cmap = base.loc[base['subzones'] > 0].sort_values(by='subzones')
@@ -497,7 +497,7 @@ def data_explore():
     #district_poly = [ Polygon(xy) for xy in district_xy] # coords to Polygon
 
     for maz in shp:
-        if maz["properties"]["subzone09"] <= max_subzone and maz["properties"]["subzone09"] > 0:
+        if maz["properties"]["subzone09"] > 0:
             subzones.append(maz["properties"]["subzone09"])
             district_x.append([x[0] for x in maz["geometry"]["coordinates"][0]])
             district_y.append([y[1] for y in maz["geometry"]["coordinates"][0]])
@@ -587,7 +587,7 @@ def data_explore():
     polygons = p.patches('x', 'y', source=source, fill_color={'field': 'work', 'transform': color_mapper},
                   fill_alpha=1, line_color=None, line_width=.5)
 
-    poly_plot = make_poly_map(p, ecd, 'NAME',None,.5,'Black',.5,False,"EDA_FLAG")
+    #poly_plot = make_poly_map(p, ecd, 'NAME',None,.5,'Black',.5,False,"EDA_FLAG")
 
 
 
