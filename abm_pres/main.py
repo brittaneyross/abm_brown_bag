@@ -11,7 +11,7 @@ from bokeh.io import show, output_notebook, push_notebook, curdoc, output_file
 from bokeh.plotting import figure, output_file, save
 from bokeh.layouts import layout, column, row
 from bokeh.models.selections import Selection
-from bokeh.models import NumberFormatter,CustomJS, Panel, Spacer,HoverTool,LogColorMapper, ColumnDataSource, TapTool, BoxSelectTool, LabelSet, Label, FactorRange,NumeralTickFormatter
+from bokeh.models import Select,NumberFormatter,CustomJS, Panel, Spacer,HoverTool,LogColorMapper, ColumnDataSource, TapTool, BoxSelectTool, LabelSet, Label, FactorRange,NumeralTickFormatter
 from bokeh.tile_providers import STAMEN_TERRAIN_RETINA,CARTODBPOSITRON_RETINA
 from bokeh.core.properties import value
 from bokeh.transform import factor_cmap, dodge
@@ -44,7 +44,9 @@ hh_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','hh_sample.c
 per_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','per_sample.csv'))
 iTours_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itour_sample.csv'))
 itrips_sample = pd.read_csv(join(dirname(__file__),'data','sample_data','itrips_sample.csv'))
-
+ecd = join(dirname(__file__),'data','shapefiles','ecd_shp.shp')
+ecd_maz = join(dirname(__file__),'data','shapefiles','ecdmazdest_shp.shp')
+ecd_trips_attr = pd.read_csv(join(dirname(__file__),'data','ecd_trip_groups.csv'))
 
 
 def make_filter_vbar(df, groups_field, subgroups, filters, tool_tips, chart_tools,palette_color,
@@ -152,6 +154,63 @@ def make_filter_vbar(df, groups_field, subgroups, filters, tool_tips, chart_tool
     return column(drop_down, p)
         #return source
 
+def make_base_map(tile_map=CARTODBPOSITRON_RETINA,map_width=800,map_height=500, xaxis=None, yaxis=None,
+                xrange=(-9990000,-9619944), yrange=(5011119,5310000),plot_tools="pan,wheel_zoom,reset"):
+
+    p = figure(tools=plot_tools, width=map_width,height=map_height, x_axis_location=xaxis, y_axis_location=yaxis,
+                x_range=xrange, y_range=yrange)
+
+    p.grid.grid_line_color = None
+
+    p.add_tile(tile_map)
+
+    return p
+def make_poly_map(base_map, shapefile,label,fillcolor,fillalpha,linecolor,lineweight,add_label,legend_field):
+
+    p = base_map
+
+    shp = fiona.open(shapefile)
+
+    # Extract features from shapefile
+    district_name = [ feat["properties"][label].replace(" County","") for feat in shp]
+    pareas = [ feat["properties"][legend_field] for feat in shp]
+    pop = [ feat["properties"]["TOT_POP"] for feat in shp]
+    district_area = [ feat["properties"]["Shape_Area"] for feat in shp]
+    district_x = [ [x[0] for x in feat["geometry"]["coordinates"][0]] for feat in shp]
+    district_y = [ [y[1] for y in feat["geometry"]["coordinates"][0]] for feat in shp]
+    district_xy = [ [ xy for xy in feat["geometry"]["coordinates"][0]] for feat in shp]
+    district_poly = [ Polygon(xy) for xy in district_xy] # coords to Polygon
+
+    source = ColumnDataSource(data=dict(
+        x=district_x, y=district_y,
+        name=district_name,
+        planning = pareas,
+        pop=pop
+    ))
+
+    ecd_df = pd.DataFrame({'x':district_x,'y':district_y,'name':district_name,'planning':pareas,'pop':pop})
+
+    #ecd_df.to_csv(os.path.join(cur,'abm_pres','data','ecd_src.csv'), index=False)
+
+    polygons = p.patches('x', 'y', source=source, fill_color=fillcolor,
+              fill_alpha=fillalpha, line_color=linecolor, line_width=lineweight, legend=legend_field)
+
+    if add_label:
+
+        labels = LabelSet(x='label_x', y='label_y', source=source,text='name', level='glyph',text_line_height=1.5,
+                  x_offset = -15,y_offset = -8,render_mode='canvas',text_font_size="10pt",text_color="white")
+
+        p.add_layout(labels)
+
+    TOOLTIPS = [
+        ("Census Tract", '@name'),
+        ("Total Population", '@pop')
+    ]
+
+    p.add_tools(HoverTool(tooltips=TOOLTIPS, renderers=[polygons]))
+
+
+    return p
 
 def load_image(image, title_text):
     p = figure(x_range=(0,250), y_range=(0,410),plot_width=600, plot_height=800,
@@ -400,6 +459,185 @@ def output_tab():
             row(column(tour_div,tour_tbl,trip_button), Spacer(width = int(column_width*.1)), column(trip_div,trip_tbl)))))
 
 
+def data_explore():
+    d_title = Div(text="""<h1>Trips by Activity</h1>""", width = column_width)
+
+    #develop map data_explore
+
+    total_trips = pd.crosstab(index = ecd_trips_attr['destsubzone09'],columns=ecd_trips_attr['trip_purpose'],
+            values=ecd_trips_attr['Model'],aggfunc=sum).fillna(0).reset_index()
+
+    shp = fiona.open(ecd_maz)
+    mazs = [y_val["properties"]["subzone09"] if y_val["properties"]["subzone09"] <= 16443 else 0 for y_val in shp]
+
+    base = pd.DataFrame({'subzones': mazs})
+    cmap = base.loc[base['subzones'] > 0].sort_values(by='subzones')
+
+    cmap_attr = cmap.merge(total_trips, how='left', left_on = 'subzones', right_on = 'destsubzone09').fillna(0)
+
+    #cmap_attr.to_csv(os.path.join(cur,'abm_pres','data','cmap_purp.csv'), index=False)
+
+    cmap_attr = cmap_attr.set_index('subzones')
+
+    trips_dict = cmap_attr.to_dict()
+
+    max_subzone = 16443
+    shp = fiona.open(ecd_maz)
+    #subzones = [y_val["properties"]["subzone09"] if y_val["properties"]["subzone09"]  <= max_zone else  for y_val in shp]
+    subzones = []
+    district_x = []
+    district_y = []
+    district_xy = []
+    district_poly = []
+
+    #district_area = [ feat["properties"]["Shape_Area"] for feat in shp]
+    #district_x = [ [x[0] for x in feat["geometry"]["coordinates"][0]] for feat in shp]
+    #district_y = [ [y[1] for y in feat["geometry"]["coordinates"][0]] for feat in shp]
+    #district_xy = [ [ xy for xy in feat["geometry"]["coordinates"][0]] for feat in shp]
+    #district_poly = [ Polygon(xy) for xy in district_xy] # coords to Polygon
+
+    for maz in shp:
+        if maz["properties"]["subzone09"] <= max_subzone and maz["properties"]["subzone09"] > 0:
+            subzones.append(maz["properties"]["subzone09"])
+            district_x.append([x[0] for x in maz["geometry"]["coordinates"][0]])
+            district_y.append([y[1] for y in maz["geometry"]["coordinates"][0]])
+            district_xy.append([ xy for xy in maz["geometry"]["coordinates"][0]])
+            district_xy.append(Polygon(xy) for xy in district_xy)
+
+
+    disc = []
+    eat = []
+    esc = []
+    main = []
+    sch = []
+    shop = []
+    uni = []
+    vis = []
+    work = []
+    wb = []
+    for k,v in trips_dict.items():
+
+        if k == 'Discretionary':
+            disc = [trips_dict[k][y_val] for y_val in subzones]
+        if k == 'Eating Out':
+            eat = [trips_dict[k][y_val]  for y_val in subzones]
+        if k == 'Escort':
+            esc = [trips_dict[k][y_val]  for y_val in subzones]
+        if k == 'Maintenance':
+            main = [trips_dict[k][y_val]  for y_val in subzones]
+        if k == 'School':
+            sch = [trips_dict[k][y_val]  for y_val in subzones]
+        if k == 'Shopping':
+            shop = [trips_dict[k][y_val]  for y_val in subzones]
+        if k == 'University':
+            uni = [trips_dict[k][y_val]  for y_val in subzones]
+        if k == 'Visiting':
+            vis = [trips_dict[k][y_val]  for y_val in subzones]
+        if k == 'Work':
+            work = [trips_dict[k][y_val]  for y_val in subzones]
+        if k == 'Work-Based':
+            wb = [trips_dict[k][y_val]  for y_val in subzones]
+
+
+    cmap_map_src = pd.DataFrame({'subzones':subzones,
+    'x':district_x, 'y':district_y,'disc':disc,
+    'escort':esc,
+    'main':main,
+    'school':sch,
+    'shop':shop,
+    'university':uni,
+    'visit':vis,
+    'work':work,
+    'work-based':wb })
+
+    #column source
+    source = ColumnDataSource(cmap_map_src)
+
+    #cmap_map_src.to_csv(os.path.join(cur,'abm_pres','data','cmap_src.csv'), index=False)
+
+    def make_base_map(tile_map=CARTODBPOSITRON_RETINA,map_width=1000,map_height=800, xaxis=None, yaxis=None,
+                    xrange=(-9990000,-9619944), yrange=(5011119,5310000),plot_tools="pan,wheel_zoom,reset"):
+
+        p = figure(tools=plot_tools, width=map_width,height=map_height, x_axis_location=xaxis, y_axis_location=yaxis,
+                    x_range=xrange, y_range=yrange)
+
+        p.grid.grid_line_color = None
+
+        p.add_tile(tile_map)
+
+        return p
+
+    p = make_base_map()
+    custom_colors = ['#e5f5f9',
+    '#99d8c9',
+    '#2ca25f']
+
+    color_mapper = LogColorMapper(palette=custom_colors)
+
+    def update(attr, old, new):
+        poly_val = drop_down.value
+
+        polygons.glyph.fill_color['field'] = poly_val
+
+        print(polygons.glyph.fill_color['field'])
+
+
+
+
+    polygons = p.patches('x', 'y', source=source, fill_color={'field': 'work', 'transform': color_mapper},
+                  fill_alpha=1, line_color=None, line_width=.5)
+
+    poly_plot = make_poly_map(p, ecd, 'NAME',None,.5,'Black',.5,False,"EDA_FLAG")
+
+
+
+    filter_menu = [('escort','escort'),('main','main'),('school','school'),('work','work')]
+
+    #drop_down = Dropdown(label='Choose Trip Purpose', button_type="default",
+    #                     menu=filter_menu, width=250,default_value='work')
+    cb_cselect = CustomJS(args=dict(cir=polygons,csource=source), code ="""
+        var selected_color = cb_obj.value;
+        cir.glyph.fill_color.field = selected_color;
+        csource.change.emit();
+        cir.change.emit();
+    """)
+
+
+    select_map = Select(options=['escort','main','school','shop','university','visit','work','work-based'],
+                       callback=cb_cselect)
+
+    #drop_down.on_change('value', cb_cselect)
+
+
+    l=column(select_map,p)
+
+    #table data_explore
+    age_groups = pd.crosstab(index = ecd_trips_attr['Age Range'],columns=ecd_trips_attr['trip_mode'],
+            values=ecd_trips_attr['Model'],aggfunc=sum).fillna(0)
+
+
+    age_groups["Total"] = age_groups.sum(axis=1)
+
+    age_groups_per = (age_groups.loc[:,"Bike":"Walk"].div(age_groups["Total"], axis=0)*100).reset_index()
+
+    income = pd.crosstab(index = ecd_trips_attr['hhincome'],columns=ecd_trips_attr['trip_mode'],
+                values=ecd_trips_attr['Model'],aggfunc=sum).fillna(0)
+    income["Total"] = income.sum(axis=1)
+    income_groups_per = (income.loc[:,"Bike":"Walk"].div(income["Total"], axis=0)*100).reset_index()
+
+    float_format='{:20,.1f}%'.format
+
+    age_div = Div(text=age_groups_per.to_html(index=False,float_format='{:20,.1f}%'.format,
+    classes=["table-bordered", "table-hover","text-center","table-condensed","thead-dark"]))
+
+    income_div = Div(text=income_groups_per.to_html(index=False,float_format='{:20,.1f}%'.format,
+    classes=["table-bordered", "table-hover","text-center","table-condensed","thead-dark"]))
+
+    return row(column(select_map,p),Spacer(width = 50),column(Spacer(height=50),age_div,income_div))
+
+
+
+
 h_1 = Div(text = """<h1><center>Intro Text</center></h1>""",width=column_width)
 h_2 = Div(text = """<h1><center>Intro Text</center></h1>""")
 h_4 = Div(text = """<h1><center>Intro Text</center></h1>""")
@@ -409,7 +647,7 @@ b_1 = layout(children=[key_features()])
 
 l_1 = layout(children=[overview_tab()])
 l_2 = layout(children=[output_tab()])
-l_3 = layout(children=[h_4])
+l_3 = layout(children=[data_explore()])
 
 tab_0 = Panel(child=b_0, title ='Background')
 tab_1 = Panel(child=b_1, title ='Advantages')
